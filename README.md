@@ -1,0 +1,2 @@
+# django-tailwind-dashboard-template
+DjangoにTailwind CSS、Turnstile認証、そしてユーザー用ダッシュボードを初期搭載した、すぐに開発を始められるプロジェクトテンプレートです。
