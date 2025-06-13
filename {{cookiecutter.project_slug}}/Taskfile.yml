@@ -1,0 +1,203 @@
+version: "3"
+dotenv: [".env", "{{.ENV}}/.env", "{{.HOME}}/.env"]
+
+tasks:
+  startproject:
+    desc: "start project using django"
+    cmds:
+      - poetry run django-admin startproject $PROJECT_NAME
+
+  dev:
+    desc: "runserver dev"
+    dir: ./{{cookiecutter.project_slug}}
+    cmds:
+      - poetry run python3 manage.py runserver --settings config.settings.dev
+
+  prod:
+    desc: "runserver prod"
+    dir: ./{{cookiecutter.project_slug}}
+    cmds:
+      - poetry run python3 manage.py runserver --settings config.settings.prod
+
+  collectstatic:
+    desc: "collectstatic"
+    dir: ./{{cookiecutter.project_slug}}
+    cmds:
+      - poetry run python3 manage.py collectstatic --noinput
+
+  startapp:
+    desc: "startapp {ARG}"
+    dir: ./{{cookiecutter.project_slug}}/apps
+    cmds:
+      - poetry run python3 ../manage.py startapp {{.CLI_ARGS}}
+
+  shell:
+    desc: "shell"
+    dir: ./{{cookiecutter.project_slug}}
+    cmds:
+      - poetry run python3 manage.py shell_plus
+
+  shelldev:
+    desc: "shell"
+    dir: ./{{cookiecutter.project_slug}}
+    cmds:
+      - poetry run python3 manage.py shell_plus --settings config.settings.dev
+
+  dbshell:
+    desc: "dbshell"
+    dir: ./{{cookiecutter.project_slug}}
+    cmds:
+      - poetry run python3 manage.py dbshell
+
+  diagram:
+    desc: "manage.py generate_puml --file diagram.puml --include schools articles --add-help --add-legend"
+    dir: ./{{cookiecutter.project_slug}}
+    cmds:
+      - poetry run python3 manage.py generate_puml --file ../tmp/diagram.puml --add-choices --add-legend
+
+  manage:
+    desc: "manage.py {ARG}"
+    dir: ./dtd
+    cmds:
+      - poetry run python3 manage.py {{.CLI_ARGS}}
+
+  guni:
+    desc: "gunicorn"
+    dir: ./dtd
+    cmds:
+      - poetry run gunicorn -c ./config/gunicorn.py config.wsgi:application
+
+  test:
+    desc: "test -v 2 {ARG}"
+    dir: ./dtd
+    cmds:
+      - poetry run python3 manage.py test -v 2 {{.CLI_ARGS}}
+
+  maintenance:
+    desc: "maintenance {ARG} (on or off)"
+    dir: ./dtd
+    cmds:
+      - poetry run python3 manage.py maintenance_mode {{.CLI_ARGS}}
+
+  format:
+    desc: "isort . & black ."
+    cmds:
+      - poetry run isort . & poetry run black .
+
+  lint:
+    desc: "flake8 --show-source"
+    cmds:
+      - poetry run flake8 --show-source {{.CLI_ARGS}}
+
+  ## Frontend Tasks
+
+  npm-install:
+    desc: "Install npm dependencies"
+    dir: ./frontend
+    cmds:
+      - npm install
+
+  css-build:
+    desc: "Build CSS files"
+    dir: ./frontend
+    cmds:
+      - npm run build
+
+  css-watch:
+    desc: "Watch and build CSS files"
+    dir: ./frontend
+    cmds:
+      - npm run dev
+
+  css-clean:
+    desc: "Clean generated CSS files"
+    dir: ./frontend
+    cmds:
+      - npm run clean
+
+  ## DATABASE
+
+  makemigrations:
+    desc: "makemigrations"
+    dir: ./dtd
+    cmds:
+      - poetry run python3 manage.py makemigrations
+
+  cleanup_migrations:
+    desc: "remove all migration files"
+    dir: ./dtd/apps
+    cmds:
+      - rm -rf **/migrations/0*
+
+  migrate:
+    desc: "migrate"
+    dir: ./dtd
+    cmds:
+      - task: makemigrations
+      - poetry run python3 manage.py migrate
+
+  createsuperuser:
+    desc: "createsuperuser"
+    dir: ./dtd
+    cmds:
+      - cmd: poetry run python3 manage.py createsuperuser --noinput
+        ignore_error: true
+
+  create_local_database:
+    desc: "create local database"
+    cmds:
+      - psql -d postgres -c "CREATE DATABASE $POSTGRES_NAME WITH ENCODING 'UTF8' LC_COLLATE='ja_JP.UTF-8' LC_CTYPE='ja_JP.UTF-8' TEMPLATE=template0;"
+      - psql -d postgres -c "GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_NAME TO admin;"
+      - psql -d $POSTGRES_NAME -c "GRANT ALL ON SCHEMA public TO admin;"
+
+  reset_local_database:
+    desc: "reset local database"
+    cmds:
+      - psql -d postgres -c "DROP DATABASE $POSTGRES_NAME;"
+      - task: create_local_database
+
+  dump_local_database:
+    desc: "dump local database"
+    cmds:
+      - pg_dump -d $POSTGRES_NAME -Fc -f backup.dump
+      - mv backup.dump $TMP_DIR
+
+  load_local_database:
+    desc: "load local database"
+    cmds:
+      - task: reset_local_database
+      - pg_restore -d $POSTGRES_NAME $TMP_DIR/backup.dump
+
+  create_database:
+    desc: "create database"
+    cmds:
+      - sudo su - postgres -c "psql -c \"CREATE DATABASE $POSTGRES_NAME WITH ENCODING 'UTF8' LC_COLLATE='ja_JP.UTF-8' LC_CTYPE='ja_JP.UTF-8' TEMPLATE=template0;\""
+      - sudo su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE $POSTGRES_NAME TO admin;\""
+      - sudo su - postgres -c "psql -d $POSTGRES_NAME -c \"GRANT ALL ON SCHEMA public TO admin;\""
+      - sudo systemctl restart postgresql
+
+  reset_database:
+    desc: "reset database"
+    cmds:
+      - sudo su - postgres -c "psql -c \"DROP DATABASE $POSTGRES_NAME;\""
+      - task: create_database
+
+  dump_database:
+    desc: "dump database"
+    cmds:
+      - sudo su - postgres -c "pg_dump -d $POSTGRES_NAME -Fc -f backup.dump"
+      - sudo mv /var/lib/postgresql/backup.dump $TMP_DIR
+
+  load_database:
+    desc: "load datbase"
+    cmds:
+      - task: reset_database
+      - sudo su - postgres -c "pg_restore -d $POSTGRES_NAME $TMP_DIR/backup.dump"
+
+  setup:
+    desc: "setup"
+    dir: ./dtd
+    cmds:
+      - task: migrate
+      - task: collectstatic
+      - poetry run python3 manage.py shell_plus --command "from django.contrib.sites.models import Site; s = Site.objects.get(id=1); s.domain = '$DOMAIN'; s.name = '$ADMIN_SITE_TITLE'; s.save()"

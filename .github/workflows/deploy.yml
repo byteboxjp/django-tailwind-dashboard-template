@@ -1,0 +1,33 @@
+name: 本番環境へデプロイ
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.PROD_DEPLOY_KEY }}
+
+      - name: Deploy to Server
+        env:
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          SSH_USER: ${{ vars.PROD_SSH_USER }}
+          SSH_PORT: ${{ vars.PROD_SSH_PORT }}
+          SSH_HOST: ${{ vars.PROD_SSH_HOST }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << EOF
+            cd ~/$PROJECT_NAME
+            git pull origin main
+            /home/linuxbrew/.linuxbrew/bin/task migrate
+            /home/linuxbrew/.linuxbrew/bin/task collectstatic
+          EOF

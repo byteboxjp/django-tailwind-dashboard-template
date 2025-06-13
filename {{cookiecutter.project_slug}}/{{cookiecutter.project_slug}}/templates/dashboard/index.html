@@ -1,0 +1,203 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% load core_tags %}
+
+{% block title %}ダッシュボード{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Total Users -->
+    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">総ユーザー数</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ total_users|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Users -->
+    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">アクティブユーザー</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ active_users|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- New Users -->
+    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">新規ユーザー（月）</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ new_users_this_month|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Contacts -->
+    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">お問い合わせ</p>
+                <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ total_contacts|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-4 mb-4 lg:grid-cols-2">
+    <!-- User Registration Chart -->
+    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">ユーザー登録推移</h3>
+            <span class="text-sm text-gray-500 dark:text-gray-400">過去7日間</span>
+        </div>
+        <div class="relative h-64">
+            <canvas id="userChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Recent Contacts -->
+    <div class="p-4 bg-white rounded-lg shadow dark:bg-gray-800">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">最近のお問い合わせ</h3>
+            <a href="#" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">すべて表示</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-4 py-2">件名</th>
+                        <th scope="col" class="px-4 py-2">送信者</th>
+                        <th scope="col" class="px-4 py-2">ステータス</th>
+                        <th scope="col" class="px-4 py-2">日時</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contact in recent_contacts %}
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ contact.subject|truncatechars:30 }}
+                        </td>
+                        <td class="px-4 py-2">{{ contact.name }}</td>
+                        <td class="px-4 py-2">
+                            {% if contact.status == 'new' %}
+                                <span class="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300">新規</span>
+                            {% elif contact.status == 'in_progress' %}
+                                <span class="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full dark:bg-yellow-900 dark:text-yellow-300">対応中</span>
+                            {% elif contact.status == 'resolved' %}
+                                <span class="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full dark:bg-green-900 dark:text-green-300">解決済み</span>
+                            {% else %}
+                                <span class="px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-900 dark:text-gray-300">クローズ</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2">{{ contact.created_at|date:"n/j G:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">お問い合わせはありません</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="p-4 mb-4 bg-white rounded-lg shadow dark:bg-gray-800">
+    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">クイックアクション</h3>
+    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <a href="#" class="flex flex-col items-center p-4 text-center bg-gray-50 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
+            <svg class="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"></path>
+            </svg>
+            <span class="text-sm font-medium text-gray-900 dark:text-white">ユーザー追加</span>
+        </a>
+        <a href="#" class="flex flex-col items-center p-4 text-center bg-gray-50 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
+            <svg class="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-2a1 1 0 100-2h2a4 4 0 014 4v6a4 4 0 01-4 4H4a4 4 0 01-4-4V7a4 4 0 014-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-sm font-medium text-gray-900 dark:text-white">コンテンツ作成</span>
+        </a>
+        <a href="#" class="flex flex-col items-center p-4 text-center bg-gray-50 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
+            <svg class="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path>
+                <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"></path>
+            </svg>
+            <span class="text-sm font-medium text-gray-900 dark:text-white">メッセージ確認</span>
+        </a>
+        <a href="#" class="flex flex-col items-center p-4 text-center bg-gray-50 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600">
+            <svg class="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="text-sm font-medium text-gray-900 dark:text-white">設定</span>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// User Registration Chart
+const ctx = document.getElementById('userChart').getContext('2d');
+const userChartData = {{ user_chart_data|json_dumps|safe }};
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: userChartData.map(item => item.date),
+        datasets: [{
+            label: '新規登録数',
+            data: userChartData.map(item => item.count),
+            borderColor: 'rgb(99, 102, 241)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+[project]
+name = "{{ cookiecutter.project_slug }}"
+version = "{{ cookiecutter.project_version }}"
+description = "{{ cookiecutter.project_description }}"
+authors = [
+    {name = "{{ cookiecutter.author_name }}",email = "{{ cookiecutter.email }}"}
+]
+license = {text = "MIT License"}
+readme = "README.md"
+requires-python = ">={{ cookiecutter.python_version }}"
+dependencies = [
+]
+
+
+[tool.poetry.dependencies]
+python = ">={{ cookiecutter.python_version }},<3.13"
+django = "^{{ cookiecutter.django_version }}"
+djangorestframework = "^3.14.0"
+gunicorn = "^21.2.0"
+psycopg2-binary = "^2.9.9"
+python-dotenv = "^1.0.0"
+celery = "^5.3.6"
+redis = "^5.0.3"
+django-redis = "^5.4.0"
+django-extensions = "^3.2.3"
+django-debug-toolbar = "^5.1.0"
+django-filter = "^24.3"
+pillow = "^10.0.1"
+django-tailwind = "^3.8.0"
+django-browser-reload = "^1.12.0"
+pytz = "^2023.3.post1"
+ipython = "^8.16.1"
+factory-boy = "^3.3.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.9.1"
+flake8 = "^6.1.0"
+isort = "^5.12.0"
+ruff = "^0.1.0"
+pytest = "^7.4.0"
+pytest-django = "^4.5.2"
+pytest-cov = "^4.1.0"
+coverage = "^7.3.0"
+pre-commit = "^3.5.0"
+detect-secrets = "^1.5.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+include = '\.py$'
+exclude = '''
+(
+      \.git
+    | \.venv
+    | \.vscode
+    | node
+    | media
+)
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip = [".venv", "media"]
+skip_glob = "*/migrations/*.py"
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "I", "W"]
+ignore = []
+exclude = [
+    ".git",
+    ".venv",
+    "*/migrations/*",
+    "__pycache__",
+    "node_modules",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-v --reuse-db"
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    ".venv/*",
+    "*/migrations/*",
+    "*/tests/*",
+    "*/test_*.py",
+    "manage.py",
+    "config/wsgi.py",
+    "config/asgi.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", "{{ cookiecutter.project_slug }}/*/tests/", "{{ cookiecutter.project_slug }}/*/migrations/"]
+skips = ["B101", "B601"]  # B101: assert_used, B601: paramiko_calls

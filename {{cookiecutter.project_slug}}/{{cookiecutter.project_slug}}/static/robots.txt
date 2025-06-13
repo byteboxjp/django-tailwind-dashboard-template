@@ -1,0 +1,9 @@
+# Robots.txt for DTD Dashboard
+User-agent: *
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /accounts/
+Disallow: /media/
+Disallow: /static/admin/
+Allow: /static/
+Sitemap: https://example.com/sitemap.xml

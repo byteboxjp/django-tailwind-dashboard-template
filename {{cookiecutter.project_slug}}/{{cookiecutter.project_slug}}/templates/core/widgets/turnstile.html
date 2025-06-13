@@ -1,0 +1,22 @@
+{% load i18n %}
+<div class="cf-turnstile" 
+     data-sitekey="{{ widget.site_key }}"
+     data-theme="{{ widget.theme }}"
+     data-size="{{ widget.size }}"
+     data-callback="onTurnstileSuccess"
+     data-error-callback="onTurnstileError">
+</div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+    function onTurnstileSuccess(token) {
+        // Token is automatically added to the form by Turnstile
+        console.log('Turnstile verification successful');
+    }
+    
+    function onTurnstileError() {
+        console.error('Turnstile verification failed');
+        // You can add custom error handling here
+    }
+</script>
