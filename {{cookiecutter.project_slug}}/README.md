@@ -2,6 +2,11 @@
 
 {{ cookiecutter.project_description }}
 
+## 📚 ドキュメント
+
+- **開発者向け詳細ガイド**: [CLAUDE.md](CLAUDE.md) - Claude Codeやその他のAIツールでの開発に最適化されたプロジェクトガイド
+- **各アプリケーションのガイド**: 各アプリディレクトリ内の`CLAUDE.md`を参照
+
 ## 概要
 
 このプロジェクトは、Django + TailwindCSSで構築されたダッシュボードアプリケーションです。
