@@ -12,9 +12,9 @@
   "use_sentry": "n",
   "use_cloudflare_turnstile": "n",
   "database_engine": ["postgresql", "sqlite3"],
-  "postgresql_version": "15",
+  "postgresql_version": "17",
   "python_version": "3.11",
-  "django_version": "4.2.6",
+  "django_version": "5.2",
   "_copy_without_render": [
     "*.html",
     "*.css",

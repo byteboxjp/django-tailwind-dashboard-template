@@ -1,5 +1,5 @@
 version: "3"
-dotenv: [".env", "{{.ENV}}/.env", "{{.HOME}}/.env"]
+dotenv: [".env", "{% raw %}{{.ENV}}{% endraw %}/.env", "{% raw %}{{.HOME}}{% endraw %}/.env"]
 
 tasks:
   startproject:
@@ -29,7 +29,7 @@ tasks:
     desc: "startapp {ARG}"
     dir: ./{{cookiecutter.project_slug}}/apps
     cmds:
-      - poetry run python3 ../manage.py startapp {{.CLI_ARGS}}
+      - poetry run python3 ../manage.py startapp {% raw %}{{.CLI_ARGS}}{% endraw %}
 
   shell:
     desc: "shell"
@@ -59,7 +59,7 @@ tasks:
     desc: "manage.py {ARG}"
     dir: ./dtd
     cmds:
-      - poetry run python3 manage.py {{.CLI_ARGS}}
+      - poetry run python3 manage.py {% raw %}{{.CLI_ARGS}}{% endraw %}
 
   guni:
     desc: "gunicorn"
@@ -71,13 +71,13 @@ tasks:
     desc: "test -v 2 {ARG}"
     dir: ./dtd
     cmds:
-      - poetry run python3 manage.py test -v 2 {{.CLI_ARGS}}
+      - poetry run python3 manage.py test -v 2 {% raw %}{{.CLI_ARGS}}{% endraw %}
 
   maintenance:
     desc: "maintenance {ARG} (on or off)"
     dir: ./dtd
     cmds:
-      - poetry run python3 manage.py maintenance_mode {{.CLI_ARGS}}
+      - poetry run python3 manage.py maintenance_mode {% raw %}{{.CLI_ARGS}}{% endraw %}
 
   format:
     desc: "isort . & black ."
@@ -87,7 +87,7 @@ tasks:
   lint:
     desc: "flake8 --show-source"
     cmds:
-      - poetry run flake8 --show-source {{.CLI_ARGS}}
+      - poetry run flake8 --show-source {% raw %}{{.CLI_ARGS}}{% endraw %}
 
   ## Frontend Tasks
 
