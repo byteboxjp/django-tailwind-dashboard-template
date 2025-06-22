@@ -15,7 +15,7 @@ def addclass(field, css_class):
     フォームフィールドにCSSクラスを追加
     
     Usage:
-        {{ form.field|addclass:"form-input" }}
+        {% raw %}{{ form.field|addclass:"form-input" }}{% endraw %}
     """
     return field.as_widget(attrs={"class": css_class})
 
@@ -26,7 +26,7 @@ def placeholder(field, text):
     フォームフィールドにプレースホルダーを追加
     
     Usage:
-        {{ form.field|placeholder:"メールアドレスを入力" }}
+        {% raw %}{{ form.field|placeholder:"メールアドレスを入力" }}{% endraw %}
     """
     return field.as_widget(attrs={"placeholder": text})
 
@@ -37,7 +37,7 @@ def site_name():
     サイト名を返す
     
     Usage:
-        {% site_name %}
+        {% raw %}{% site_name %}{% endraw %}
     """
     return getattr(settings, 'SITE_NAME', 'DTD')
 
@@ -48,8 +48,8 @@ def get_setting(name, default=None):
     Django設定値を取得
     
     Usage:
-        {% get_setting "DEBUG" %}
-        {% get_setting "CUSTOM_SETTING" "default_value" %}
+        {% raw %}{% get_setting "DEBUG" %}
+        {% get_setting "CUSTOM_SETTING" "default_value" %}{% endraw %}
     """
     return getattr(settings, name, default)
 
@@ -60,7 +60,7 @@ def pagination(page_obj, **kwargs):
     ページネーションコンポーネントを表示
     
     Usage:
-        {% pagination page_obj %}
+        {% raw %}{% pagination page_obj %}{% endraw %}
     """
     from apps.core.utils import get_page_range
     
@@ -78,7 +78,7 @@ def json_dumps(data):
     
     Usage:
         <script>
-            const data = {{ python_dict|json_dumps|safe }};
+            const data = {% raw %}{{ python_dict|json_dumps|safe }}{% endraw %};
         </script>
     """
     return mark_safe(json.dumps(data, ensure_ascii=False))
@@ -90,7 +90,7 @@ def multiply(value, arg):
     数値を掛け算
     
     Usage:
-        {{ price|multiply:quantity }}
+        {% raw %}{{ price|multiply:quantity }}{% endraw %}
     """
     try:
         return float(value) * float(arg)
@@ -104,7 +104,7 @@ def divide(value, arg):
     数値を割り算
     
     Usage:
-        {{ total|divide:count }}
+        {% raw %}{{ total|divide:count }}{% endraw %}
     """
     try:
         return float(value) / float(arg)
@@ -118,7 +118,7 @@ def active_class(context, url_name, css_class='active'):
     現在のURLと一致する場合にCSSクラスを返す
     
     Usage:
-        <li class="{% active_class 'home' 'active' %}">
+        <li class="{% raw %}{% active_class 'home' 'active' %}{% endraw %}">
     """
     request = context.get('request')
     if not request:
@@ -142,6 +142,6 @@ def get_item(dictionary, key):
     辞書から値を取得
     
     Usage:
-        {{ my_dict|get_item:key }}
+        {% raw %}{{ my_dict|get_item:key }}{% endraw %}
     """
     return dictionary.get(key)
