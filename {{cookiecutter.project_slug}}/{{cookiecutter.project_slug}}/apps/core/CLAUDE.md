@@ -43,8 +43,8 @@ class MyForm(TurnstileMixin, forms.Form):
 
 ### テンプレートタグ (`templatetags/core_tags.py`)
 ```django
-{% load core_tags %}
-{% settings_value "SITE_NAME" %}  {# 設定値取得 #}
+{% raw %}{% load core_tags %}
+{% settings_value "SITE_NAME" %}  {# 設定値取得 #}{% endraw %}
 ```
 
 ## 共通パターン
