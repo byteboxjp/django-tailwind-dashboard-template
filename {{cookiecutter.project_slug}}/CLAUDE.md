@@ -237,5 +237,5 @@ poetry run pytest --cov=apps --cov-report=html
 
 ---
 
-最終更新: {% now 'Y-m-d' %}
-プロジェクト生成: cookiecutter version
+最終更新: {% now 'local' %}
+プロジェクト生成: cookiecutter {{ cookiecutter._cookiecutter_version }}
